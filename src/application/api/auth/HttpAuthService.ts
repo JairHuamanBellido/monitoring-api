@@ -30,9 +30,8 @@ export class HttpAuthService {
       username: username,
     });   
 
-    const decryptedPassword = this.encryptRepository.decrypt( account.getPassword())
 
-    if (!account || password !== decryptedPassword) {
+    if (!account || password !== this.encryptRepository.decrypt(account.getPassword())) {
       throw new HttpException({ message: 'Credentials incorrect', code: HttpStatus.BAD_REQUEST }, HttpStatus.BAD_REQUEST);
     }
 
