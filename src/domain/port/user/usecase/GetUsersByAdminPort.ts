@@ -1,6 +1,6 @@
 import { UserRole } from '@core/enums/UserRoleEnum';
 
-export interface GetUserPort {
+export interface GetUsersByAdminPort {
   dni?: string;
   email?: string;
   id?: number;

@@ -10,15 +10,29 @@ import { UpdateUserUseCase } from '@domain/usecase/user/UpdateUserUseCase';
 import { CreateUserAdapter } from '@infrastructure/adapters/usecase/user/CreateUserAdapter';
 import { GetUserAdapter } from '@infrastructure/adapters/usecase/user/GetUserAdapter';
 import { UpdateUserAdapter } from '@infrastructure/adapters/usecase/user/UpdateUserAdapter';
-import { Body, Controller, Get, Inject, Param, Post, Put, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Put,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { HttpAuth } from '../auth/decorator/HttpAuth';
 import { HttpUser } from '../auth/decorator/HttpUser';
 import { HttpJwtAuthGuard } from '../auth/guard/HttpJwtGuard';
 import { HttpJwtPayload } from '../auth/type/HttpAuthType';
-import { Request as R} from "express"
+import { Request as R } from 'express';
 import { HttpRestApiModelCreateUserBody } from './documentation/user/HttpRestApiModelCreateUserBody';
 import { HttpRestApiModelUpdateUserBody } from './documentation/user/HttpRestApiModelUpdateUserBody';
+import { GetUsersByAdminUseCase } from '@domain/usecase/user/GetUsersByAdminUseCase';
+import { GetUsersByAdminAdapter } from '@infrastructure/adapters/usecase/user/GetUsersGetUsersByAdminAdapter';
 
 @Controller('users')
 export class UsersController {
@@ -33,8 +47,33 @@ export class UsersController {
 
     @Inject(UserDITokens.UpdateUserUseCase)
     private readonly updateUserUseCase: UpdateUserUseCase,
+
+    @Inject(UserDITokens.GetUsersByAdminUseCase)
+    private readonly getUsersByAdminUseCase: GetUsersByAdminUseCase,
   ) {}
 
+  @HttpAuth(UserRole.ADMIN, UserRole.ADMIN)
+  @UseGuards(HttpJwtAuthGuard)
+  @Get('guest')
+  public async getPersonalInformation(@HttpUser() httpUser: HttpJwtPayload): Promise<UserUseCaseDto> {
+    const adapter: GetUserAdapter = await GetUserAdapter.new({ dni: httpUser.dni });
+    const user: UserUseCaseDto = await this.getUserUseCase.execute(adapter);
+
+    return user;
+  }
+
+  @HttpAuth(UserRole.ADMIN)
+  @UseGuards(HttpJwtAuthGuard)
+  @Get('by-admin')
+  public async getUsersByAdmin(): Promise<UserUseCaseDto[]> {
+    const adapter: GetUsersByAdminAdapter = await GetUsersByAdminAdapter.new({ role: UserRole.USER });
+    const users: UserUseCaseDto[] = await this.getUsersByAdminUseCase.execute(adapter);
+
+    return users;
+  }
+
+  @HttpAuth(UserRole.ADMIN, UserRole.USER)
+  @UseGuards(HttpJwtAuthGuard)
   @Get(':dni')
   public async findOneByDni(@Param('dni') dni: string): Promise<UserUseCaseDto> {
     const adapter: GetUserAdapter = await GetUserAdapter.new({ dni: dni });
@@ -45,50 +84,58 @@ export class UsersController {
 
   @UseInterceptors(FileInterceptor('file'))
   @Post('/')
-  public async createUser(@UploadedFile() file:FileStorage, @Req() req: R<any,any,HttpRestApiModelCreateUserBody>): Promise<WriteResourceUseCase> {
-
-    const newFilename = `${req.body.dni}.${file.originalname.split('.')[1]}`
+  public async createUser(
+    @UploadedFile() file: FileStorage,
+    @Req() req: R<any, any, HttpRestApiModelCreateUserBody>,
+  ): Promise<WriteResourceUseCase> {
+    const newFilename = `${req.body.dni}.${file.originalname.split('.')[1]}`;
     file.originalname = newFilename;
 
     const adapter: CreateUserAdapter = await CreateUserAdapter.new({
-      age:      req.body.age,
-      avatar:   file,
-      dni:      req.body.dni,
-      email:    req.body.email,
+      age: req.body.age,
+      avatar: file,
+      dni: req.body.dni,
+      email: req.body.email,
       lastname: req.body.lastname,
-      name:     req.body.name,
-      rol:      req.body.rol,
+      name: req.body.name,
+      rol: req.body.rol,
       password: req.body.password,
       username: req.body.username,
     });
 
-    return  await this.createUserUseCase.execute(adapter);
+    return await this.createUserUseCase.execute(adapter);
   }
 
   @HttpAuth(UserRole.ADMIN)
   @UseGuards(HttpJwtAuthGuard)
   @Put('/:id')
-  public async updateUserFromAdmin(@Body() body: HttpRestApiModelUpdateUserBody, @Param('id') id: string, @HttpUser() httpUser:HttpJwtPayload): Promise<WriteResourceUseCase> {    
+  public async updateUserFromAdmin(
+    @Body() body: HttpRestApiModelUpdateUserBody,
+    @Param('id') id: string,
+    @HttpUser() httpUser: HttpJwtPayload,
+  ): Promise<WriteResourceUseCase> {
     const adapter: UpdateUserAdapter = await UpdateUserAdapter.new({
       id: parseInt(id),
       updatedBy: httpUser.dni,
-      ...body
+      ...body,
     });
-    
+
     return await this.updateUserUseCase.execute(adapter);
   }
 
   @HttpAuth(UserRole.USER)
   @UseGuards(HttpJwtAuthGuard)
   @Put('/')
-  public async updateUser(@Body() body: HttpRestApiModelUpdateUserBody,@HttpUser() httpUser: HttpJwtPayload): Promise<WriteResourceUseCase> {
+  public async updateUser(
+    @Body() body: HttpRestApiModelUpdateUserBody,
+    @HttpUser() httpUser: HttpJwtPayload,
+  ): Promise<WriteResourceUseCase> {
     const adapter: UpdateUserAdapter = await UpdateUserAdapter.new({
       id: httpUser.id,
       updatedBy: httpUser.dni,
-      ...body
-    })
+      ...body,
+    });
 
-    return await this.updateUserUseCase.execute(adapter)
+    return await this.updateUserUseCase.execute(adapter);
   }
-
 }

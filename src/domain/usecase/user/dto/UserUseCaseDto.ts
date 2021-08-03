@@ -1,5 +1,4 @@
 /* eslint-disable prettier/prettier */
-import { Optional } from '@core/types/CommonTypes';
 import { User } from '@domain/entity/user/User';
 import { AccountUseCaseDto } from '@domain/usecase/account/dto/AccountUseCaseDto';
 import { Exclude, Expose, plainToClass, Type } from 'class-transformer';

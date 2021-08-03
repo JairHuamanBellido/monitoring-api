@@ -63,6 +63,6 @@ export class HttpAuthService {
   public async getUser(dni:string): Promise<boolean> {
     const user = await this.userRepository.findUser({dni: dni})
     
-    return !user
+    return user ? true : false
   }
 }

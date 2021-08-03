@@ -9,6 +9,7 @@ import { FileStoragePort } from '@domain/port/storage/FileStoragePort';
 import { UserRepositoryPort } from '@domain/port/user/persistence/UserRepositoryPort';
 import { CreateAccountService } from '@domain/service/account/CreateAccountService';
 import { CreateUserService } from '@domain/service/user/CreateUserService';
+import { GetUsersByAdminService } from '@domain/service/user/GetUsersByAdminService';
 import { GetUserService } from '@domain/service/user/GetUserService';
 import { UpdateUserService } from '@domain/service/user/UpdateUserService';
 import { EncryptorAdapter } from '@infrastructure/adapters/encrypt/EncryptorAdapter';
@@ -73,10 +74,16 @@ const useCaseProviders: Provider[] = [
     inject: [UserDITokens.UserRepository],
   },
   {
+    provide: UserDITokens.GetUsersByAdminUseCase,
+    useFactory: (userRepository: UserRepositoryPort) => new GetUsersByAdminService(userRepository),
+    inject: [UserDITokens.UserRepository]
+  },
+  {
     provide: AccountDITokens.CreateAccountUseCase,
     useFactory: (accountRepository: AccountRepositoryPort) => new CreateAccountService(accountRepository),
     inject: [AccountDITokens.AccountRepository],
   },
+  
 ];
 
 @Module({
