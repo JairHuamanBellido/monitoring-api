@@ -14,7 +14,7 @@ type UserQueryBuilder = SelectQueryBuilder<TypeOrmUser>;
 export abstract class TypeOrmUserRepositoryAdapter extends Repository<TypeOrmUser> implements UserRepositoryPort {
   private readonly userAlias: string = 'user';
 
-  public async findAllUsersByAdmin(by?: FindUserOptionsRepositoryDto): Promise<any> {
+  public async findAllUsersForAdmin(by?: FindUserOptionsRepositoryDto): Promise<any> {
     const query: UserQueryBuilder = this.buildUserQueryBuilder();
 
     this.extendQueryWithByProperties(by, query);

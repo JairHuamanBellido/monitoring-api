@@ -2,7 +2,7 @@ import { User } from '@domain/entity/user/User';
 import { FindUserOptionsRepositoryDto } from './dto/FindUserOptionsRepositoryDto';
 
 export interface UserRepositoryPort {
-  findAllUsersByAdmin(by?: FindUserOptionsRepositoryDto): Promise<User[]>;
+  findAllUsersForAdmin(by?: FindUserOptionsRepositoryDto): Promise<User[]>;
 
   findUser(by: FindUserOptionsRepositoryDto): Promise<User>;
 

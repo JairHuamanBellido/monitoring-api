@@ -5,7 +5,7 @@ export class UserDITokens {
   public static readonly GetUserUseCase: unique symbol = Symbol('GetUserUseCase');
   public static readonly CreateUserUseCase: unique symbol = Symbol('CreateUserUseCase');
   public static readonly UpdateUserUseCase: unique symbol = Symbol('UpdateUserUseCase');
-  public static readonly GetUsersByAdminUseCase: unique symbol = Symbol('GetUsersByAdminUseCase')
+  public static readonly GetUsersForAdminUseCase: unique symbol = Symbol('GetUsersForAdminUseCase')
 
   // Repository
 

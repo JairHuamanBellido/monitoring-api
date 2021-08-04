@@ -31,8 +31,9 @@ import { HttpJwtPayload } from '../auth/type/HttpAuthType';
 import { Request as R } from 'express';
 import { HttpRestApiModelCreateUserBody } from './documentation/user/HttpRestApiModelCreateUserBody';
 import { HttpRestApiModelUpdateUserBody } from './documentation/user/HttpRestApiModelUpdateUserBody';
-import { GetUsersByAdminUseCase } from '@domain/usecase/user/GetUsersByAdminUseCase';
-import { GetUsersByAdminAdapter } from '@infrastructure/adapters/usecase/user/GetUsersGetUsersByAdminAdapter';
+import { GetUsersForAdminUseCase } from '@domain/usecase/user/GetUsersForAdminUseCase';
+import { GetUsersForAdminAdapter } from '@infrastructure/adapters/usecase/user/GetUsersForAdminAdapter';
+import { UsersForAdminUseCaseDto } from '@domain/usecase/user/dto/UserForAdminUseCaseDto';
 
 @Controller('users')
 export class UsersController {
@@ -48,8 +49,8 @@ export class UsersController {
     @Inject(UserDITokens.UpdateUserUseCase)
     private readonly updateUserUseCase: UpdateUserUseCase,
 
-    @Inject(UserDITokens.GetUsersByAdminUseCase)
-    private readonly getUsersByAdminUseCase: GetUsersByAdminUseCase,
+    @Inject(UserDITokens.GetUsersForAdminUseCase)
+    private readonly getUsersForAdminUseCase: GetUsersForAdminUseCase,
   ) {}
 
   @HttpAuth(UserRole.ADMIN, UserRole.ADMIN)
@@ -64,10 +65,10 @@ export class UsersController {
 
   @HttpAuth(UserRole.ADMIN)
   @UseGuards(HttpJwtAuthGuard)
-  @Get('by-admin')
-  public async getUsersByAdmin(): Promise<UserUseCaseDto[]> {
-    const adapter: GetUsersByAdminAdapter = await GetUsersByAdminAdapter.new({ role: UserRole.USER });
-    const users: UserUseCaseDto[] = await this.getUsersByAdminUseCase.execute(adapter);
+  @Get('for-admin')
+  public async getUsersForAdmin(): Promise<UsersForAdminUseCaseDto[]> {
+    const adapter: GetUsersForAdminAdapter = await GetUsersForAdminAdapter.new({ role: UserRole.USER });
+    const users: UsersForAdminUseCaseDto[] = await this.getUsersForAdminUseCase.execute(adapter);
 
     return users;
   }
