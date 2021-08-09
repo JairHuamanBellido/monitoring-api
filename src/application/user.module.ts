@@ -19,6 +19,7 @@ import { TypeOrmUserRepositoryAdapter } from '@infrastructure/database/repositor
 import { Module, Provider } from '@nestjs/common';
 import { Connection } from 'typeorm';
 import { UsersController } from './api/controller/UserController';
+import { WebSocketUsersManagement } from './gateway/WebSocketUsersManagement';
 
 const persistenceProviders: Provider[] = [
   {
@@ -54,13 +55,7 @@ const useCaseProviders: Provider[] = [
       accountRepository: AccountRepositoryPort,
       fileStorage: FileStoragePort,
       encryptorRepository: EncryptPort,
-    ) =>
-      new CreateUserService(
-        userRepository,
-        accountRepository,
-        fileStorage,
-        encryptorRepository,
-      ),
+    ) => new CreateUserService(userRepository, accountRepository, fileStorage, encryptorRepository),
     inject: [
       UserDITokens.UserRepository,
       AccountDITokens.AccountRepository,
@@ -76,19 +71,18 @@ const useCaseProviders: Provider[] = [
   {
     provide: UserDITokens.GetUsersForAdminUseCase,
     useFactory: (userRepository: UserRepositoryPort) => new GetUsersForAdminService(userRepository),
-    inject: [UserDITokens.UserRepository]
+    inject: [UserDITokens.UserRepository],
   },
   {
     provide: AccountDITokens.CreateAccountUseCase,
     useFactory: (accountRepository: AccountRepositoryPort) => new CreateAccountService(accountRepository),
     inject: [AccountDITokens.AccountRepository],
   },
-  
 ];
 
 @Module({
   controllers: [UsersController],
-  providers: [...persistenceProviders, ...useCaseProviders],
+  providers: [...persistenceProviders, ...useCaseProviders, WebSocketUsersManagement],
   exports: [UserDITokens.UserRepository, AccountDITokens.AccountRepository],
 })
 export class UserModule {}
