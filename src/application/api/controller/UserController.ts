@@ -53,7 +53,7 @@ export class UsersController {
     private readonly getUsersForAdminUseCase: GetUsersForAdminUseCase,
   ) {}
 
-  @HttpAuth(UserRole.ADMIN, UserRole.ADMIN)
+  @HttpAuth(UserRole.ADMIN, UserRole.USER)
   @UseGuards(HttpJwtAuthGuard)
   @Get('guest')
   public async getPersonalInformation(@HttpUser() httpUser: HttpJwtPayload): Promise<UserUseCaseDto> {
