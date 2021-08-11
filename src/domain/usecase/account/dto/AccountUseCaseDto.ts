@@ -11,6 +11,7 @@ export class AccountUseCaseDto {
 
   public password: string;
 
+  @Expose()
   public isBlocked: boolean;
 
   public static newFromAccount(account: Account): AccountUseCaseDto {
