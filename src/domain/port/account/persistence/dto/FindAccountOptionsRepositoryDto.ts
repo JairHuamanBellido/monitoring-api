@@ -1,4 +1,5 @@
 export interface FindAccountOptionsRepositoryDto {
-  username: string;
+  id?: number;
+  username?: string;
   password?: string;
 }

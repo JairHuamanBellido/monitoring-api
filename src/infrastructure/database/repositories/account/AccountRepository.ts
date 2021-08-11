@@ -5,11 +5,9 @@ import { WriteResourceUseCase } from '@core/usecase/WriteResourceUseCase';
 import { TypeOrmAccountMapper } from '@infrastructure/database/mappers/account/TypeOrmAccountMapper';
 import { Account } from '@domain/entity/account/Account';
 import { AccountRepositoryPort } from '@domain/port/account/persistence/AccountRepositoryPort';
-import { User } from '@domain/entity/user/User';
 import { FindAccountOptionsRepositoryDto } from '@domain/port/account/persistence/dto/FindAccountOptionsRepositoryDto';
 
 type AccountQueryBuilder = SelectQueryBuilder<TypeormAccount>;
-
 
 @EntityRepository(TypeormAccount)
 export abstract class TypeormAccountRepositoryAdapter
@@ -18,37 +16,53 @@ export abstract class TypeormAccountRepositoryAdapter
 {
   private readonly accountAlias: string = 'account';
 
-  public async createAccount(domainAccount: Account, domainUser: User): Promise<WriteResourceUseCase> {
-    const ormAccount: TypeormAccount = TypeOrmAccountMapper.toOrmEntity(domainAccount,domainUser);
+  public async createAccount(domainAccount: Account): Promise<WriteResourceUseCase> {
+    const ormAccount: TypeormAccount = TypeOrmAccountMapper.toOrmEntity(domainAccount);
 
-    await this.createQueryBuilder(this.accountAlias)
-      .insert()
-      .into(TypeormAccount)
-      .values([ormAccount])
-      .execute();
+    await this.createQueryBuilder(this.accountAlias).insert().into(TypeormAccount).values([ormAccount]).execute();
 
     return { message: 'Se ha creado con exito la cuenta' };
   }
 
   public async findAccount(payload: FindAccountOptionsRepositoryDto): Promise<Account> {
-
-    let domainAccount:Account;
+    let domainAccount: Account;
 
     const query: AccountQueryBuilder = this.buildAccountQueryBuilder();
-    
-    const ormAccount: TypeormAccount = await query
-      .andWhere(`"${this.accountAlias}".username = :username`, {username: payload.username})
-      .getOne();
+    this.extendQueryWithByProperties(payload, query);
+
+    const ormAccount: TypeormAccount = await query.getOne();
 
     if (ormAccount) {
-      domainAccount = TypeOrmAccountMapper.toDomainEntity(ormAccount)
+      domainAccount = TypeOrmAccountMapper.toDomainEntity(ormAccount);
     }
 
-    return domainAccount
+    return domainAccount;
+  }
+
+  public async updateAccount(domainAccount: Account): Promise<void> {
+    const ormAccount: TypeormAccount = TypeOrmAccountMapper.toOrmEntity(domainAccount);
+
+    await this.createQueryBuilder(this.accountAlias)
+      .update(TypeormAccount)
+      .set(ormAccount)
+      .where('id = :id', { id: domainAccount.getId() })
+      .execute();
   }
 
   /** Private functions*/
   private buildAccountQueryBuilder(): AccountQueryBuilder {
     return this.createQueryBuilder(this.accountAlias).select().where(`"${this.accountAlias}".is_active = true`);
+  }
+
+  private extendQueryWithByProperties(by: FindAccountOptionsRepositoryDto, query: AccountQueryBuilder) {
+    if (by.id) {
+      query.andWhere(`"${this.accountAlias}".id = :id`, { id: by.id });
+    }
+    if (by.username) {
+      query.andWhere(`"${this.accountAlias}".username = :username`, { username: by.username });
+    }
+    if (by.password) {
+      query.andWhere(`"${this.accountAlias}".password = :password`, { password: by.password });
+    }
   }
 }

@@ -1,7 +1,6 @@
 export class AccountDITokens {
   // Use cases
-
-  public static readonly CreateAccountUseCase: unique symbol = Symbol('CreateAccountUseCase');
+  public static readonly UpdateAccountStatusUseCase: unique symbol = Symbol('UpdateAccountStatusUseCase');
 
   // Repository
 

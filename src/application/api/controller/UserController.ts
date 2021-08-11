@@ -16,11 +16,11 @@ import {
   Get,
   Inject,
   Param,
+  Patch,
   Post,
   Put,
   Req,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -34,6 +34,10 @@ import { HttpRestApiModelUpdateUserBody } from './documentation/user/HttpRestApi
 import { GetUsersForAdminUseCase } from '@domain/usecase/user/GetUsersForAdminUseCase';
 import { GetUsersForAdminAdapter } from '@infrastructure/adapters/usecase/user/GetUsersForAdminAdapter';
 import { UsersForAdminUseCaseDto } from '@domain/usecase/user/dto/UserForAdminUseCaseDto';
+import { AccountDITokens } from '@domain/di/account/AccountDIToken';
+import { UpdateAccountStatusUseCase } from '@domain/usecase/account/UpdateAccountStatusUseCase';
+import { UpdateAccountStatusPort } from '@domain/port/account/usecase/UpdateAccountStatusPort';
+import { UpdateAccountStatusAdapter } from '@infrastructure/adapters/usecase/account/UpdateAccountStatusAdapter';
 
 @Controller('users')
 export class UsersController {
@@ -51,10 +55,12 @@ export class UsersController {
 
     @Inject(UserDITokens.GetUsersForAdminUseCase)
     private readonly getUsersForAdminUseCase: GetUsersForAdminUseCase,
+
+    @Inject(AccountDITokens.UpdateAccountStatusUseCase)
+    private readonly updateAccountStatusUseCase: UpdateAccountStatusUseCase,
   ) {}
 
   @HttpAuth(UserRole.ADMIN, UserRole.USER)
-  @UseGuards(HttpJwtAuthGuard)
   @Get('guest')
   public async getPersonalInformation(@HttpUser() httpUser: HttpJwtPayload): Promise<UserUseCaseDto> {
     const adapter: GetUserAdapter = await GetUserAdapter.new({ dni: httpUser.dni });
@@ -64,7 +70,6 @@ export class UsersController {
   }
 
   @HttpAuth(UserRole.ADMIN)
-  @UseGuards(HttpJwtAuthGuard)
   @Get('for-admin')
   public async getUsersForAdmin(): Promise<UsersForAdminUseCaseDto[]> {
     const adapter: GetUsersForAdminAdapter = await GetUsersForAdminAdapter.new({ role: UserRole.USER });
@@ -74,13 +79,26 @@ export class UsersController {
   }
 
   @HttpAuth(UserRole.ADMIN, UserRole.USER)
-  @UseGuards(HttpJwtAuthGuard)
   @Get(':dni')
   public async findOneByDni(@Param('dni') dni: string): Promise<UserUseCaseDto> {
     const adapter: GetUserAdapter = await GetUserAdapter.new({ dni: dni });
     const user: UserUseCaseDto = await this.getUserUseCase.execute(adapter);
 
     return user;
+  }
+
+  @HttpAuth(UserRole.ADMIN)
+  @Patch('account-status/:id')
+  public async updateAccountStatus(
+    @Param('id') id: string,
+    @HttpUser() httpUser: HttpJwtPayload,
+  ): Promise<WriteResourceUseCase> {
+    const adapter: UpdateAccountStatusPort = await UpdateAccountStatusAdapter.new({
+      accountId: parseInt(id),
+      executeBy: httpUser.dni,
+    });
+    
+    return await this.updateAccountStatusUseCase.execute(adapter);
   }
 
   @UseInterceptors(FileInterceptor('file'))
@@ -108,7 +126,6 @@ export class UsersController {
   }
 
   @HttpAuth(UserRole.ADMIN)
-  @UseGuards(HttpJwtAuthGuard)
   @Put('/:id')
   public async updateUserFromAdmin(
     @Body() body: HttpRestApiModelUpdateUserBody,
@@ -125,7 +142,6 @@ export class UsersController {
   }
 
   @HttpAuth(UserRole.USER)
-  @UseGuards(HttpJwtAuthGuard)
   @Put('/')
   public async updateUser(
     @Body() body: HttpRestApiModelUpdateUserBody,

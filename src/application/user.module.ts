@@ -7,7 +7,6 @@ import { AccountRepositoryPort } from '@domain/port/account/persistence/AccountR
 import { EncryptPort } from '@domain/port/encrypt/EncryptPort';
 import { FileStoragePort } from '@domain/port/storage/FileStoragePort';
 import { UserRepositoryPort } from '@domain/port/user/persistence/UserRepositoryPort';
-import { CreateAccountService } from '@domain/service/account/CreateAccountService';
 import { CreateUserService } from '@domain/service/user/CreateUserService';
 import { GetUsersForAdminService } from '@domain/service/user/GetUsersForAdminService';
 import { GetUserService } from '@domain/service/user/GetUserService';
@@ -20,6 +19,7 @@ import { Module, Provider } from '@nestjs/common';
 import { Connection } from 'typeorm';
 import { UsersController } from './api/controller/UserController';
 import { WebSocketUsersManagement } from './gateway/WebSocketUsersManagement';
+import { UpdateAccountStatusService } from '@domain/service/account/UpdateAccountStatusService';
 
 const persistenceProviders: Provider[] = [
   {
@@ -74,10 +74,10 @@ const useCaseProviders: Provider[] = [
     inject: [UserDITokens.UserRepository],
   },
   {
-    provide: AccountDITokens.CreateAccountUseCase,
-    useFactory: (accountRepository: AccountRepositoryPort) => new CreateAccountService(accountRepository),
-    inject: [AccountDITokens.AccountRepository],
-  },
+    provide: AccountDITokens.UpdateAccountStatusUseCase,
+    useFactory: (accountRepository: AccountRepositoryPort) => new UpdateAccountStatusService(accountRepository),
+    inject: [AccountDITokens.AccountRepository]
+  }
 ];
 
 @Module({

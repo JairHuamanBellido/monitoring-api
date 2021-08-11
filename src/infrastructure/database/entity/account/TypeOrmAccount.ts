@@ -19,6 +19,9 @@ export class TypeormAccount {
   @Column({ type: 'bool', default: false, name: 'is_blocked' })
   isBlocked?: boolean;
 
+  @Column()
+  user_id: number;
+
   @Column({ type: 'boolean', default: true, name: 'is_active' })
   isActive?: boolean;
 

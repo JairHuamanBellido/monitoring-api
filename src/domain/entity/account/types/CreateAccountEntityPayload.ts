@@ -1,6 +1,7 @@
 export type CreateAccountEntityPayload = {
   id?: number;
   username: string;
+  userId: number;
   password: string;
   isBlocked: boolean;
   createdBy?: string;

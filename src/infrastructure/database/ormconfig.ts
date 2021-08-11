@@ -10,7 +10,7 @@ export const ormconfig: TypeOrmModuleOptions = {
   database: DatabaseConfig.DB_NAME,
   entities: [__dirname + '/entity/**/*{.ts,.js}'],
   logging: false,
-  migrationsRun: true,
+  migrationsRun: false,
   migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
   migrationsTransactionMode: 'all',
   cli: {

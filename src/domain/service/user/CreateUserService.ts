@@ -53,13 +53,12 @@ export class CreateUserService implements CreateUserUseCase {
       password  : this.encryptorRepository.encrypt(payload.password),
       username  : payload.username,
       createdAt : new Date(),
-      createdBy : userCreated.getDni()
+      createdBy : userCreated.getDni(),
+      userId    : userCreated.getId()
     })
 
-    await this.accountRepository.createAccount(account,userCreated)
+    await this.accountRepository.createAccount(account)
     
     return  { message: "Creado" }  
-    
-    
   }
 }

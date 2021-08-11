@@ -1,5 +1,6 @@
 import { IsBoolean, IsDate, IsInt, IsString } from 'class-validator';
 import { CreateAccountEntityPayload } from './types/CreateAccountEntityPayload';
+import { UpdateAccountEntityPayload } from './types/UpdateAccountEntityPayload';
 
 export class Account {
   @IsInt()
@@ -32,6 +33,9 @@ export class Account {
   @IsDate()
   private deletedAt?: Date;
 
+  @IsInt()
+  private userId: number;
+
   constructor(payload: CreateAccountEntityPayload) {
     this.id = payload.id;
     this.username = payload.username;
@@ -43,6 +47,7 @@ export class Account {
     this.updatedBy = payload.updatedBy;
     this.deletedAt = payload.deletedAt;
     this.deletedBy = payload.deletedBy;
+    this.userId = payload.userId;
   }
 
   public getId(): number {
@@ -83,5 +88,19 @@ export class Account {
 
   public getDeletedAt(): Date {
     return this.deletedAt;
+  }
+
+  public getUserId(): number {
+    return this.userId;
+  }
+  public edit(payload: UpdateAccountEntityPayload): void {
+    const currentDate = new Date();
+
+    this.updatedBy = payload.updatedBy;
+    this.updatedAt = currentDate;
+
+    if (payload.username) this.username = payload.username;
+    if (payload.password) this.password = payload.password;
+    if (payload.isBlocked !== undefined) this.isBlocked = payload.isBlocked;
   }
 }

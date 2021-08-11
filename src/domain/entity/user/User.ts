@@ -135,26 +135,12 @@ export class User {
     this.updatedAt = currentDate;
     this.updatedBy = payload.updatedBy;
 
-    if (payload.age) {
-      this.age = payload.age;
-    }
-    if (payload.avatar) {
-      this.avatar = payload.avatar;
-    }
-    if (payload.dni) {
-      this.dni = payload.dni;
-    }
-    if (payload.email) {
-      this.email = payload.email;
-    }
-    if (payload.lastname) {
-      this.lastname = payload.lastname;
-    }
-    if (payload.name) {
-      this.name = payload.name;
-    }
-    if (payload.rol) {
-      this.rol = payload.rol;
-    }
+    if (payload.age) this.age = payload.age;
+    if (payload.avatar) this.avatar = payload.avatar;
+    if (payload.dni) this.dni = payload.dni;
+    if (payload.email) this.email = payload.email;
+    if (payload.lastname) this.lastname = payload.lastname;
+    if (payload.name) this.name = payload.name;
+    if (payload.rol) this.rol = payload.rol;
   }
 }
