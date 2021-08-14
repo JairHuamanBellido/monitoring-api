@@ -21,6 +21,12 @@ export class UserUseCaseDto {
   public avatar: string;
 
   @Expose()
+  public age: number;
+
+  @Expose()
+  public dni: string;
+  
+  @Expose()
   @Type(() => AccountUseCaseDto)
   public account: AccountUseCaseDto;
 
