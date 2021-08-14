@@ -26,7 +26,6 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { HttpAuth } from '../auth/decorator/HttpAuth';
 import { HttpUser } from '../auth/decorator/HttpUser';
-import { HttpJwtAuthGuard } from '../auth/guard/HttpJwtGuard';
 import { HttpJwtPayload } from '../auth/type/HttpAuthType';
 import { Request as R } from 'express';
 import { HttpRestApiModelCreateUserBody } from './documentation/user/HttpRestApiModelCreateUserBody';
@@ -93,7 +92,7 @@ export class UsersController {
     @Param('id') id: string,
     @HttpUser() httpUser: HttpJwtPayload,
   ): Promise<WriteResourceUseCase> {
-    const adapter: UpdateAccountStatusPort = await UpdateAccountStatusAdapter.new({
+    const adapter: UpdateAccountStatusPort = await UpdateAccountStatusAdapter.new({   
       accountId: parseInt(id),
       executeBy: httpUser.dni,
     });
